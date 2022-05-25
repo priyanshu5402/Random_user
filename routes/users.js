@@ -1,68 +1,29 @@
 var express = require("express");
 var router = express.Router();
+var connection = require("../db.js");
+var bcrypt = require("bcrypt");
+const { DEC8_BIN } = require("mysql/lib/protocol/constants/charsets");
 
-/* GET users listing. */
-// router.get("/", function (req, res, next) {
-//   res.render("users", {
-//     title: "Users",
-//     data: [
-//       {
-//         name: "John",
-//         age: "25",
-//       },
-//       {
-//         name: "Jane",
-//         age: "24",
-//       },
-//     ],
-//   });
-//   // res.send('respond with a resource');
-// });
-router.get("/", function (req, res, next) {
-  var data = new Array();
-  // var sql = `select idusers from users`;
-  // connection.query(sql, function (err, result) {
-  //   if (err) {
-  //     console.log(err);
-  //   } else {
-  //     for (var i = 0; i < result.length; i++) {
-  //       arr.push(result[i].idusers);
-  //     }
-  //     res.send(arr);
-  //     console.log(result);
-  //   }
-  // });
-
-  const rawData = [
-    {
-      name: "John",
-      age: "25",
-    },
-    {
-      name: "Jane",
-      age: "24",
-    },
-    {
-      name: "Manikangkan",
-      age: "23",
-    },
-  ];
-
-  for (let i = 0; i < rawData.length; i++) {
-    data.push(rawData[i]);
-  }
-
-  // data.push({
-  //   name: "John",
-  //   age: "25",
-  // });
+SelectAllElements = () => {
+  return new Promise((resolve, reject) => {
+    connection.query("select idusers from users ", (error, elements) => {
+      if (error) {
+        return reject(error);
+      }
+      return resolve(elements);
+    });
+  });
+};
+router.get("/", async function (req, res, next) {
+  let sql = `select idusers from users`;
+  const resultElements = await SelectAllElements();
   res.render("users", {
     title: "Users",
-    data,
+    data: resultElements,
   });
 });
 
-router.post("/", function (req, res, next) {
+router.post("/", async function (req, res, next) {
   function genPassword() {
     var chars =
       "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -75,12 +36,41 @@ router.post("/", function (req, res, next) {
     return pass;
   }
   password = genPassword();
-  var sql = `INSERT INTO users VALUES (idusers,"${password}")`;
-  connection.query(sql, function (err) {
-    if (err) throw err;
-    console.log("record inserted");
-    res.redirect("/a");
-  });
+  
+  const resp = await InsertNewData(password);
+ 
 });
+
+InsertNewData = async (password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `INSERT INTO users VALUES (idusers,"${hashedPassword}")`,
+      (error, elements) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(elements);
+      }
+    );
+  });
+};
+
+router.post("/login", async (req, res) => {
+  const user = req.body.id;
+  if (user == null) {
+    return res.status(400).send("Cannot find user");
+  }
+    if (user) {
+      bcrypt.compare(req.body.password, hashedPassword, (err, result) => {
+        if (result) {
+          res.send("Login success");
+        } else {
+          // console.log();
+          res.send("Login failed");
+        }
+      });
+    }
+   } );
 
 module.exports = router;

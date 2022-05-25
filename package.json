@@ -7,6 +7,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
@@ -18,5 +19,18 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.16"
-  }
+  },
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/priyanshu5402/random-user-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/priyanshu5402/random-user-generator/issues"
+  },
+  "homepage": "https://github.com/priyanshu5402/random-user-generator#readme",
+  "description": ""
 }
